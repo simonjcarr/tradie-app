@@ -3,6 +3,7 @@
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Header() {
   return (
@@ -22,6 +23,7 @@ export default function Header() {
 
           {/* Auth Section */}
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <SignedOut>
               <SignInButton mode="modal">
                 <Button variant="ghost" size="default" className="text-primary-foreground hover:bg-primary/80">
