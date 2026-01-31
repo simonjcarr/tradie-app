@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User, MoreVertical, Pencil, Trash2, Ban } from "lucide-react";
+import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User, Phone, MoreVertical, Pencil, Trash2, Ban } from "lucide-react";
 import { AddTaskDialog } from "./add-task-dialog";
 import { format } from "date-fns";
 import { Id } from "@/convex/_generated/dataModel";
@@ -56,6 +56,12 @@ interface TaskType {
   color: string;
 }
 
+interface Customer {
+  _id: Id<"customers">;
+  name: string;
+  phone: string;
+}
+
 interface Task {
   _id: string;
   title: string;
@@ -66,6 +72,7 @@ interface Task {
   customerId?: string;
   taskTypeId?: Id<"taskTypes">;
   taskType?: TaskType | null;
+  customer?: Customer | null;
   createdAt: number;
 }
 
@@ -172,10 +179,16 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onSt
                     <span>{format(task.dueDate, "MMM d")}</span>
                   </div>
                 )}
-                {task.customerId && (
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    <span>Has customer</span>
+                {task.customer && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      <span className="font-medium text-foreground">{task.customer.name}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      <span>{task.customer.phone}</span>
+                    </div>
                   </div>
                 )}
               </div>

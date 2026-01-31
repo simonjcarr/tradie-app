@@ -1,7 +1,7 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
-// Get all tasks for the authenticated user with task type details
+// Get all tasks for the authenticated user with task type and customer details
 export const getTasks = query({
   args: {},
   handler: async (ctx) => {
@@ -16,12 +16,16 @@ export const getTasks = query({
       .order('desc')
       .collect();
 
-    // Enrich tasks with task type information
+    // Enrich tasks with task type and customer information
     const enrichedTasks = await Promise.all(
       tasks.map(async (task) => {
         let taskType = null;
         if (task.taskTypeId) {
           taskType = await ctx.db.get(task.taskTypeId);
+        }
+        let customer = null;
+        if (task.customerId) {
+          customer = await ctx.db.get(task.customerId);
         }
         return {
           ...task,
@@ -30,6 +34,13 @@ export const getTasks = query({
                 _id: taskType._id,
                 name: taskType.name,
                 color: taskType.color,
+              }
+            : null,
+          customer: customer
+            ? {
+                _id: customer._id,
+                name: customer.name,
+                phone: customer.phone,
               }
             : null,
         };
