@@ -77,7 +77,7 @@ export function OnboardingWizard() {
   const progressPercentage = (currentStep / steps.length) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

@@ -9,6 +9,7 @@
  */
 
 import type * as http from "../http.js";
+import type * as onboarding from "../onboarding.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 
@@ -20,6 +21,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   http: typeof http;
+  onboarding: typeof onboarding;
   tasks: typeof tasks;
   users: typeof users;
 }>;

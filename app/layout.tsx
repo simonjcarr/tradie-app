@@ -5,6 +5,7 @@ import ConvexClientProvider from '@/components/ConvexClientProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { Toaster } from '@/components/ui/toaster';
+import Header from '@/components/Header';
 import './globals.css';
 
 const inter = Inter({
@@ -47,7 +48,10 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>
-              <OnboardingGuard>{children}</OnboardingGuard>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <OnboardingGuard>{children}</OnboardingGuard>
+              </div>
             </ConvexClientProvider>
             <Toaster />
           </ThemeProvider>
