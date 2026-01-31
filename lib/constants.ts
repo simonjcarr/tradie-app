@@ -1,0 +1,30 @@
+export const TRADE_TYPES = [
+  "Plumber",
+  "Electrician",
+  "Builder",
+  "Carpenter",
+  "Painter & Decorator",
+  "HVAC Engineer",
+  "Gas Engineer",
+  "Heating Engineer",
+  "Roofer",
+  "Plasterer",
+  "Tiler",
+  "Bricklayer",
+  "Landscaper",
+  "Glazier",
+  "Locksmith",
+  "Handyman",
+  "Other",
+] as const;
+
+export const PAYMENT_METHODS = [
+  "Cash",
+  "Bank Transfer",
+  "Card",
+  "BACS",
+  "Cheque",
+  "PayPal",
+  "Stripe",
+  "Other",
+] as const;
