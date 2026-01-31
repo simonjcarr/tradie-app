@@ -186,4 +186,81 @@ describe("customers", () => {
       expect(results[0].name).toBe("John Smith");
     });
   });
+
+  describe("getCustomer", () => {
+    it("should return a customer by ID", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+        email: "john@example.com",
+        address: "123 High Street",
+        postcode: "SW1A 1AA",
+        notes: "Important client",
+      });
+
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer).toBeDefined();
+      expect(customer?._id).toBe(customerId);
+      expect(customer?.name).toBe("John Smith");
+      expect(customer?.phone).toBe("07700 900001");
+      expect(customer?.email).toBe("john@example.com");
+      expect(customer?.address).toBe("123 High Street");
+      expect(customer?.postcode).toBe("SW1A 1AA");
+      expect(customer?.notes).toBe("Important client");
+    });
+
+    it("should return null for non-existent customer", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      // Create a customer first to get a valid ID format, then use a modified one
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "Temp Customer",
+        phone: "07700 900000",
+      });
+
+      // Delete it to make it non-existent
+      await asUser.mutation(api.customers.deleteCustomer, { id: customerId });
+
+      // Now try to get the deleted customer
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer).toBeNull();
+    });
+
+    it("should return null for other user's customer", async () => {
+      const t = convexTest(schema);
+      const alice = t.withIdentity({ subject: "alice_id", name: "Alice" });
+      const bob = t.withIdentity({ subject: "bob_id", name: "Bob" });
+
+      const customerId = await alice.mutation(api.customers.createCustomer, {
+        name: "Alice's Customer",
+        phone: "07700 900001",
+      });
+
+      const customer = await bob.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer).toBeNull();
+    });
+
+    it("should require authentication", async () => {
+      const t = convexTest(schema);
+
+      await expect(async () => {
+        await t.query(api.customers.getCustomer, {
+          id: "k57b6c5g5x6x7x8x9x0x1x2x" as any,
+        });
+      }).rejects.toThrowError();
+    });
+  });
 });
