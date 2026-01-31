@@ -2,6 +2,7 @@
 
 import { ClipboardList, Users, LayoutDashboard, FileText } from "lucide-react";
 import { NavItem } from "./NavItem";
+import { UserButton } from "@clerk/nextjs";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
@@ -23,6 +24,21 @@ export function BottomNav() {
             variant="bottom"
           />
         ))}
+        {/* User Button */}
+        <div className="flex flex-col items-center justify-center gap-1 py-2 px-3 min-w-[64px]">
+          <div className="p-2 rounded-xl bg-transparent">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "h-6 w-6 rounded-full"
+                }
+              }}
+            />
+          </div>
+          <span className="text-xs font-medium text-muted-foreground">
+            Account
+          </span>
+        </div>
       </div>
     </nav>
   );
