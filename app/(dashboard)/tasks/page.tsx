@@ -7,10 +7,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User } from "lucide-react";
+import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User, MoreVertical, Pencil, Trash2, Ban } from "lucide-react";
 import { AddTaskDialog } from "./add-task-dialog";
 import { format } from "date-fns";
 import { Id } from "@/convex/_generated/dataModel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
 type TaskPriority = "low" | "medium" | "high";
@@ -47,12 +64,26 @@ const priorityConfig: Record<TaskPriority, { label: string; variant: "default" |
   high: { label: "High", variant: "destructive" },
 };
 
-function TaskCard({ task, onStatusChange }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void }) {
+function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void }) {
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
-  
+  const deleteTask = useMutation(api.tasks.deleteTask);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const handleStatusChange = async (newStatus: TaskStatus) => {
     await updateStatus({ id: task._id as any, status: newStatus });
     onStatusChange(task._id, newStatus);
+  };
+
+  const handleCancel = async () => {
+    await handleStatusChange("cancelled");
+    setShowCancelDialog(false);
+  };
+
+  const handleDelete = async () => {
+    await deleteTask({ id: task._id as any });
+    setShowDeleteDialog(false);
+    onDelete();
   };
 
   const nextStatusMap: Record<TaskStatus, TaskStatus | null> = {
@@ -64,90 +95,145 @@ function TaskCard({ task, onStatusChange }: { task: Task; onStatusChange: (id: s
 
   const nextStatus = nextStatusMap[task.status];
   const StatusIcon = statusConfig[task.status].icon;
+  const canCancel = task.status !== "cancelled" && task.status !== "done";
 
   return (
-    <Card className="mb-3">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              {task.taskType && (
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: task.taskType.color }}
-                  title={task.taskType.name}
-                />
-              )}
-              <h3 className="font-semibold text-base truncate">{task.title}</h3>
-              <Badge variant={priorityConfig[task.priority].variant} className="text-xs">
-                {priorityConfig[task.priority].label}
-              </Badge>
-            </div>
-            
-            {task.taskType && (
-              <p className="text-xs text-muted-foreground mb-1">
-                {task.taskType.name}
-              </p>
-            )}
-            
-            {task.description && (
-              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                {task.description}
-              </p>
-            )}
-            
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              {task.dueDate && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>{format(task.dueDate, "MMM d")}</span>
-                </div>
-              )}
-              {task.customerId && (
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  <span>Has customer</span>
-                </div>
-              )}
-            </div>
-          </div>
+    <>
+      <Card className="mb-3">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                {task.taskType && (
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: task.taskType.color }}
+                    title={task.taskType.name}
+                  />
+                )}
+                <h3 className="font-semibold text-base truncate">{task.title}</h3>
+                <Badge variant={priorityConfig[task.priority].variant} className="text-xs">
+                  {priorityConfig[task.priority].label}
+                </Badge>
+              </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs ${statusConfig[task.status].color}`}>
-              <StatusIcon className="h-3 w-3" />
-              <span>{statusConfig[task.status].label}</span>
+              {task.taskType && (
+                <p className="text-xs text-muted-foreground mb-1">
+                  {task.taskType.name}
+                </p>
+              )}
+
+              {task.description && (
+                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                  {task.description}
+                </p>
+              )}
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                {task.dueDate && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>{format(task.dueDate, "MMM d")}</span>
+                  </div>
+                )}
+                {task.customerId && (
+                  <div className="flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    <span>Has customer</span>
+                  </div>
+                )}
+              </div>
             </div>
-            
-            {nextStatus && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                onClick={() => handleStatusChange(nextStatus)}
-              >
-                {nextStatus === "in_progress" && "Start"}
-                {nextStatus === "done" && "Complete"}
-              </Button>
-            )}
-            
-            {task.status !== "cancelled" && task.status !== "done" && (
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs h-7 text-red-500 hover:text-red-600"
-                onClick={() => handleStatusChange("cancelled")}
-              >
-                Cancel
-              </Button>
-            )}
+
+            <div className="flex flex-col items-end gap-2">
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs ${statusConfig[task.status].color}`}>
+                <StatusIcon className="h-3 w-3" />
+                <span>{statusConfig[task.status].label}</span>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                {nextStatus && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-7"
+                    onClick={() => handleStatusChange(nextStatus)}
+                  >
+                    {nextStatus === "in_progress" && "Start"}
+                    {nextStatus === "done" && "Complete"}
+                  </Button>
+                )}
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {canCancel && (
+                    <DropdownMenuItem onClick={() => setShowCancelDialog(true)}>
+                      <Ban className="mr-2 h-4 w-4" />
+                      Cancel
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-red-600">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this task? This will mark it as cancelled.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancel} className="bg-red-600 hover:bg-red-700">
+              Yes, cancel task
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Yes, delete task
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
-function TaskList({ tasks, status, onStatusChange }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void }) {
+function TaskList({ tasks, status, onStatusChange, onDelete }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void }) {
   const filteredTasks = tasks.filter((task) => task.status === status);
 
   if (filteredTasks.length === 0) {
@@ -168,7 +254,7 @@ function TaskList({ tasks, status, onStatusChange }: { tasks: Task[]; status: Ta
   return (
     <div className="space-y-3">
       {filteredTasks.map((task) => (
-        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} />
+        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} />
       ))}
     </div>
   );
@@ -194,6 +280,11 @@ export default function TasksPage() {
   };
 
   const handleTaskAdded = () => {
+    // Force re-render to update task lists
+    forceUpdate({});
+  };
+
+  const handleDelete = () => {
     // Force re-render to update task lists
     forceUpdate({});
   };
@@ -252,19 +343,19 @@ export default function TasksPage() {
         </TabsList>
 
         <TabsContent value="todo">
-          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} />
+          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} onDelete={handleDelete} />
         </TabsContent>
 
         <TabsContent value="in_progress">
-          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} />
+          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} onDelete={handleDelete} />
         </TabsContent>
 
         <TabsContent value="done">
-          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} />
+          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} onDelete={handleDelete} />
         </TabsContent>
 
         <TabsContent value="cancelled">
-          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} />
+          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} onDelete={handleDelete} />
         </TabsContent>
       </Tabs>
     </div>
