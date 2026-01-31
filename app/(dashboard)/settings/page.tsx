@@ -89,7 +89,7 @@ export default function SettingsPage() {
           <Badge variant={completionPercentage === 100 ? "default" : "outline"}>
             {completionPercentage}% Complete
           </Badge>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Complete your profile to unlock all features
           </p>
         </div>

@@ -23,9 +23,9 @@ export default function DashboardPage() {
       <h1 className="text-3xl font-bold mb-4">
         Welcome back, {onboardingStatus.user.businessName || currentUser.name}!
       </h1>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-card border rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Your Dashboard</h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-muted-foreground">
           Your business management tools will appear here.
         </p>
       </div>

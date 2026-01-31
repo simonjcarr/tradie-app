@@ -1,4 +1,3 @@
-import Header from '@/components/Header';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Hammer, ClipboardList, Users, DollarSign, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,6 @@ import { AuthenticatedRedirect } from '@/components/AuthenticatedRedirect';
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground py-20">
@@ -20,7 +17,7 @@ export default function Home() {
                   <span className="text-accent font-bold text-sm uppercase tracking-wider">Built by Tradies, For Tradies</span>
                 </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-display font-bold mb-6 tracking-tight">
+              <h1 className="text-5xl md:text-6xl font-sans font-bold mb-6 tracking-tight">
                 RUN YOUR BUSINESS
                 <br />
                 <span className="text-secondary">LIKE A BOSS</span>
@@ -52,7 +49,7 @@ export default function Home() {
         <section className="py-20 bg-muted">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-display font-bold text-foreground mb-4">
+              <h2 className="text-4xl font-sans font-bold text-foreground mb-4">
                 ALL THE GEAR, NO IDEA? NAH MATE
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -67,7 +64,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <ClipboardList className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">JOB TRACKING</CardTitle>
+                  <CardTitle className="font-sans">JOB TRACKING</CardTitle>
                   <CardDescription className="leading-relaxed">
                     Keep your jobs sorted. Track what's done, what's coming, and what materials you need. No more "where did I put that job sheet?" moments.
                   </CardDescription>
@@ -79,7 +76,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <Users className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">CLIENT MANAGEMENT</CardTitle>
+                  <CardTitle className="font-sans">CLIENT MANAGEMENT</CardTitle>
                   <CardDescription className="leading-relaxed">
                     All your clients in one spot. Who owes you, who paid up, who's a pain in the arse—everything you need to know.
                   </CardDescription>
@@ -91,7 +88,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <DollarSign className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">GET PAID FASTER</CardTitle>
+                  <CardTitle className="font-sans">GET PAID FASTER</CardTitle>
                   <CardDescription className="leading-relaxed">
                     Bang out invoices in seconds, not hours. Track who's paid and who's "forgot their wallet." Get your coin, on time.
                   </CardDescription>
@@ -103,7 +100,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <Hammer className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">QUOTE BUILDER</CardTitle>
+                  <CardTitle className="font-sans">QUOTE BUILDER</CardTitle>
                   <CardDescription className="leading-relaxed">
                     Whip up quotes faster than you can say "she'll be right." Look professional, win the job, crack on.
                   </CardDescription>
@@ -115,7 +112,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <Zap className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">MOBILE READY</CardTitle>
+                  <CardTitle className="font-sans">MOBILE READY</CardTitle>
                   <CardDescription className="leading-relaxed">
                     Works on your phone, on-site, in the van, wherever. Update jobs while you're grabbing a bacon sarnie from Greggs.
                   </CardDescription>
@@ -127,7 +124,7 @@ export default function Home() {
                   <div className="bg-secondary/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
                     <Shield className="h-7 w-7 text-secondary" />
                   </div>
-                  <CardTitle className="font-display">SECURE & RELIABLE</CardTitle>
+                  <CardTitle className="font-sans">SECURE & RELIABLE</CardTitle>
                   <CardDescription className="leading-relaxed">
                     Your data's locked down tighter than your toolbox. Backed up, encrypted, safe as houses. You focus on the work, we'll handle the rest.
                   </CardDescription>
@@ -141,7 +138,7 @@ export default function Home() {
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-display font-bold text-foreground mb-4">
+              <h2 className="text-3xl font-sans font-bold text-foreground mb-4">
                 TOUGH AS NAILS
               </h2>
               <p className="text-muted-foreground">Hi-vis colors that mean business</p>
