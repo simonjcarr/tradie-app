@@ -11,6 +11,7 @@
 import type * as customers from "../customers.js";
 import type * as http from "../http.js";
 import type * as onboarding from "../onboarding.js";
+import type * as taskNotes from "../taskNotes.js";
 import type * as taskTypes from "../taskTypes.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   customers: typeof customers;
   http: typeof http;
   onboarding: typeof onboarding;
+  taskNotes: typeof taskNotes;
   taskTypes: typeof taskTypes;
   tasks: typeof tasks;
   users: typeof users;

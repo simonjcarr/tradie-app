@@ -71,4 +71,14 @@ export default defineSchema({
   })
     .index('by_user', ['userId'])
     .index('by_user_created', ['userId', 'createdAt']),
+
+  taskNotes: defineTable({
+    taskId: v.id('tasks'),
+    userId: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_task', ['taskId'])
+    .index('by_task_created', ['taskId', 'createdAt']),
 });
