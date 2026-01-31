@@ -9,10 +9,12 @@ import { Step1BusinessBasics } from "./Step1BusinessBasics";
 import { Step2BusinessDetails } from "./Step2BusinessDetails";
 import { Step3Preferences } from "./Step3Preferences";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export function OnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const router = useRouter();
+  const { toast } = useToast();
 
   const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus);
   const completeOnboarding = useMutation(api.onboarding.completeOnboarding);
@@ -28,16 +30,36 @@ export function OnboardingWizard() {
       setCurrentStep(step + 1);
     } else {
       // Final step - complete onboarding
-      await completeOnboarding({});
-      router.push("/dashboard");
+      try {
+        await completeOnboarding({});
+        router.push("/dashboard");
+      } catch (error) {
+        toast({
+          title: "Cannot complete onboarding",
+          description: "Please complete all required fields in step 1 before finishing.",
+          variant: "destructive",
+        });
+        setCurrentStep(1); // Send them back to step 1
+      }
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      router.push("/dashboard");
+      // Final step - skip preferences but still complete onboarding
+      try {
+        await completeOnboarding({});
+        router.push("/dashboard");
+      } catch (error) {
+        toast({
+          title: "Cannot complete onboarding",
+          description: "Please complete all required fields in step 1 before finishing.",
+          variant: "destructive",
+        });
+        setCurrentStep(1); // Send them back to step 1
+      }
     }
   };
 
