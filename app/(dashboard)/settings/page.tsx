@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TRADE_TYPES, PAYMENT_METHODS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
@@ -349,10 +350,10 @@ function SystemSettingsTab() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FormLabel className="text-base">Dark Mode</FormLabel>
-              <FormDescription>
+              <Label className="text-base">Dark Mode</Label>
+              <p className="text-sm text-muted-foreground">
                 Toggle between light and dark mode
-              </FormDescription>
+              </p>
             </div>
             <ThemeToggle />
           </div>
