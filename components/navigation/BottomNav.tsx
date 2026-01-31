@@ -3,7 +3,7 @@
 import { ClipboardList, Users, LayoutDashboard, FileText } from "lucide-react";
 import { NavItem } from "./NavItem";
 import { UserButton } from "@clerk/nextjs";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
@@ -25,14 +25,6 @@ export function BottomNav() {
             variant="bottom"
           />
         ))}
-        {/* Theme Toggle */}
-        <div className="flex flex-col items-center justify-center gap-1 py-2 px-3 min-w-[64px]">
-          <ThemeToggle />
-          <span className="text-xs font-medium text-muted-foreground">
-            Theme
-          </span>
-        </div>
-
         {/* User Button */}
         <div className="flex flex-col items-center justify-center gap-1 py-2 px-3 min-w-[64px]">
           <div className="p-2 rounded-xl bg-transparent">
