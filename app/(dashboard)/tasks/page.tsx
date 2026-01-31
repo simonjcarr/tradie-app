@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User } from "lucide-react";
+import { AddTaskDialog } from "./add-task-dialog";
 import { format } from "date-fns";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -192,6 +193,11 @@ export default function TasksPage() {
     forceUpdate({});
   };
 
+  const handleTaskAdded = () => {
+    // Force re-render to update task lists
+    forceUpdate({});
+  };
+
   const taskCounts = {
     todo: tasks.filter((t) => t.status === "todo").length,
     in_progress: tasks.filter((t) => t.status === "in_progress").length,
@@ -206,10 +212,7 @@ export default function TasksPage() {
           <h1 className="text-2xl lg:text-3xl font-bold">Tasks</h1>
           <p className="text-muted-foreground">Manage your to-do list</p>
         </div>
-        <Button className="w-full sm:w-auto gap-2">
-          <Plus className="h-4 w-4" />
-          New Task
-        </Button>
+        <AddTaskDialog onTaskAdded={handleTaskAdded} />
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TaskStatus)} className="w-full">
