@@ -28,6 +28,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
 type TaskPriority = "low" | "medium" | "high";
@@ -64,11 +82,18 @@ const priorityConfig: Record<TaskPriority, { label: string; variant: "default" |
   high: { label: "High", variant: "destructive" },
 };
 
-function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void }) {
+function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void }) {
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
   const deleteTask = useMutation(api.tasks.deleteTask);
+  const updateTask = useMutation(api.tasks.updateTask);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: task.title,
+    description: task.description || "",
+    priority: task.priority,
+  });
 
   const handleStatusChange = async (newStatus: TaskStatus) => {
     await updateStatus({ id: task._id as any, status: newStatus });
@@ -84,6 +109,17 @@ function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChan
     await deleteTask({ id: task._id as any });
     setShowDeleteDialog(false);
     onDelete();
+  };
+
+  const handleEdit = async () => {
+    await updateTask({
+      id: task._id as any,
+      title: editForm.title,
+      description: editForm.description,
+      priority: editForm.priority,
+    });
+    setShowEditDialog(false);
+    onEdit();
   };
 
   const nextStatusMap: Record<TaskStatus, TaskStatus | null> = {
@@ -172,7 +208,7 @@ function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChan
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
@@ -229,11 +265,64 @@ function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChan
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+            <DialogDescription>Update the task details below.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                placeholder="Task title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder="Task description"
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-priority">Priority</Label>
+              <Select
+                value={editForm.priority}
+                onValueChange={(value: TaskPriority) => setEditForm({ ...editForm, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
 
-function TaskList({ tasks, status, onStatusChange, onDelete }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void }) {
+function TaskList({ tasks, status, onStatusChange, onDelete, onEdit }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void }) {
   const filteredTasks = tasks.filter((task) => task.status === status);
 
   if (filteredTasks.length === 0) {
@@ -254,7 +343,7 @@ function TaskList({ tasks, status, onStatusChange, onDelete }: { tasks: Task[]; 
   return (
     <div className="space-y-3">
       {filteredTasks.map((task) => (
-        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} />
+        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} onEdit={onEdit} />
       ))}
     </div>
   );
@@ -285,6 +374,11 @@ export default function TasksPage() {
   };
 
   const handleDelete = () => {
+    // Force re-render to update task lists
+    forceUpdate({});
+  };
+
+  const handleEdit = () => {
     // Force re-render to update task lists
     forceUpdate({});
   };
@@ -343,19 +437,19 @@ export default function TasksPage() {
         </TabsList>
 
         <TabsContent value="todo">
-          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} onDelete={handleDelete} />
+          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
         </TabsContent>
 
         <TabsContent value="in_progress">
-          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} onDelete={handleDelete} />
+          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
         </TabsContent>
 
         <TabsContent value="done">
-          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} onDelete={handleDelete} />
+          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
         </TabsContent>
 
         <TabsContent value="cancelled">
-          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} onDelete={handleDelete} />
+          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
         </TabsContent>
       </Tabs>
     </div>
