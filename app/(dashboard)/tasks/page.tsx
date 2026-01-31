@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,7 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { tas
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
   const deleteTask = useMutation(api.tasks.deleteTask);
   const updateTask = useMutation(api.tasks.updateTask);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -202,7 +204,7 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { tas
               {task.mostRecentNote && (
                 <p className="text-sm text-muted-foreground mb-2 italic">
                   <span className="text-xs text-muted-foreground/60">Latest note: </span>
-                  {task.mostRecentNote.content.slice(0, 50)}
+                  {task.mostRecentNote.content.slice(0, isDesktop ? 150 : 50)}
                 </p>
               )}
 
