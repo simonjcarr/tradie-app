@@ -10,9 +10,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User } from "lucide-react";
 import { AddTaskDialog } from "./add-task-dialog";
 import { format } from "date-fns";
+import { Id } from "@/convex/_generated/dataModel";
 
 type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
 type TaskPriority = "low" | "medium" | "high";
+
+interface TaskType {
+  _id: Id<"taskTypes">;
+  name: string;
+  color: string;
+}
 
 interface Task {
   _id: string;
@@ -22,6 +29,8 @@ interface Task {
   priority: TaskPriority;
   dueDate?: number;
   customerId?: string;
+  taskTypeId?: Id<"taskTypes">;
+  taskType?: TaskType | null;
   createdAt: number;
 }
 
@@ -61,12 +70,25 @@ function TaskCard({ task, onStatusChange }: { task: Task; onStatusChange: (id: s
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {task.taskType && (
+                <div
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: task.taskType.color }}
+                  title={task.taskType.name}
+                />
+              )}
               <h3 className="font-semibold text-base truncate">{task.title}</h3>
               <Badge variant={priorityConfig[task.priority].variant} className="text-xs">
                 {priorityConfig[task.priority].label}
               </Badge>
             </div>
+            
+            {task.taskType && (
+              <p className="text-xs text-muted-foreground mb-1">
+                {task.taskType.name}
+              </p>
+            )}
             
             {task.description && (
               <p className="text-sm text-muted-foreground mb-2 line-clamp-2">

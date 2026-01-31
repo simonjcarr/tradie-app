@@ -263,4 +263,245 @@ describe("customers", () => {
       }).rejects.toThrowError();
     });
   });
+
+  describe("updateCustomer", () => {
+    it("should update customer name and phone", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      await asUser.mutation(api.customers.updateCustomer, {
+        id: customerId,
+        name: "John Updated",
+        phone: "07700 900999",
+      });
+
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer?.name).toBe("John Updated");
+      expect(customer?.phone).toBe("07700 900999");
+    });
+
+    it("should update all customer fields", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      await asUser.mutation(api.customers.updateCustomer, {
+        id: customerId,
+        name: "Jane Doe",
+        phone: "07700 900002",
+        email: "jane@example.com",
+        address: "456 New Street, Manchester",
+        postcode: "M1 1AA",
+        notes: "Updated notes",
+      });
+
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer?.name).toBe("Jane Doe");
+      expect(customer?.phone).toBe("07700 900002");
+      expect(customer?.email).toBe("jane@example.com");
+      expect(customer?.address).toBe("456 New Street, Manchester");
+      expect(customer?.postcode).toBe("M1 1AA");
+      expect(customer?.notes).toBe("Updated notes");
+    });
+
+    it("should clear optional fields when set to empty string", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+        email: "john@example.com",
+        address: "123 Street",
+        postcode: "SW1A 1AA",
+        notes: "Some notes",
+      });
+
+      await asUser.mutation(api.customers.updateCustomer, {
+        id: customerId,
+        email: "",
+        address: "",
+        postcode: "",
+        notes: "",
+      });
+
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer?.email).toBeUndefined();
+      expect(customer?.address).toBeUndefined();
+      expect(customer?.postcode).toBeUndefined();
+      expect(customer?.notes).toBeUndefined();
+    });
+
+    it("should update updatedAt timestamp", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      const originalCustomer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+      const originalUpdatedAt = originalCustomer?.updatedAt;
+
+      // Small delay to ensure timestamp changes
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      await asUser.mutation(api.customers.updateCustomer, {
+        id: customerId,
+        name: "John Updated",
+      });
+
+      const updatedCustomer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(updatedCustomer?.updatedAt).toBeGreaterThan(originalUpdatedAt!);
+    });
+
+    it("should require authentication", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      await expect(async () => {
+        await t.mutation(api.customers.updateCustomer, {
+          id: customerId,
+          name: "Hacked",
+        });
+      }).rejects.toThrowError();
+    });
+
+    it("should not allow updating other user's customer", async () => {
+      const t = convexTest(schema);
+      const alice = t.withIdentity({ subject: "alice_id", name: "Alice" });
+      const bob = t.withIdentity({ subject: "bob_id", name: "Bob" });
+
+      const customerId = await alice.mutation(api.customers.createCustomer, {
+        name: "Alice's Customer",
+        phone: "07700 900001",
+      });
+
+      await expect(async () => {
+        await bob.mutation(api.customers.updateCustomer, {
+          id: customerId,
+          name: "Hacked by Bob",
+        });
+      }).rejects.toThrowError("Customer not found or access denied");
+    });
+
+    it("should throw error for non-existent customer", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      // Create and delete a customer to get a valid but non-existent ID
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "Temp",
+        phone: "07700 900000",
+      });
+      await asUser.mutation(api.customers.deleteCustomer, { id: customerId });
+
+      await expect(async () => {
+        await asUser.mutation(api.customers.updateCustomer, {
+          id: customerId,
+          name: "Updated",
+        });
+      }).rejects.toThrowError("Customer not found or access denied");
+    });
+  });
+
+  describe("deleteCustomer", () => {
+    it("should delete a customer", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      await asUser.mutation(api.customers.deleteCustomer, { id: customerId });
+
+      const customer = await asUser.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+
+      expect(customer).toBeNull();
+    });
+
+    it("should require authentication", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "John Smith",
+        phone: "07700 900001",
+      });
+
+      await expect(async () => {
+        await t.mutation(api.customers.deleteCustomer, { id: customerId });
+      }).rejects.toThrowError();
+    });
+
+    it("should not allow deleting other user's customer", async () => {
+      const t = convexTest(schema);
+      const alice = t.withIdentity({ subject: "alice_id", name: "Alice" });
+      const bob = t.withIdentity({ subject: "bob_id", name: "Bob" });
+
+      const customerId = await alice.mutation(api.customers.createCustomer, {
+        name: "Alice's Customer",
+        phone: "07700 900001",
+      });
+
+      await expect(async () => {
+        await bob.mutation(api.customers.deleteCustomer, { id: customerId });
+      }).rejects.toThrowError("Customer not found or access denied");
+
+      // Verify customer still exists
+      const customer = await alice.query(api.customers.getCustomer, {
+        id: customerId,
+      });
+      expect(customer).toBeDefined();
+    });
+
+    it("should throw error for non-existent customer", async () => {
+      const t = convexTest(schema);
+      const asUser = t.withIdentity({ subject: "user_123", name: "Test User" });
+
+      // Create and delete a customer to get a valid but non-existent ID
+      const customerId = await asUser.mutation(api.customers.createCustomer, {
+        name: "Temp",
+        phone: "07700 900000",
+      });
+      await asUser.mutation(api.customers.deleteCustomer, { id: customerId });
+
+      await expect(async () => {
+        await asUser.mutation(api.customers.deleteCustomer, { id: customerId });
+      }).rejects.toThrowError("Customer not found or access denied");
+    });
+  });
 });
