@@ -1,7 +1,7 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
-// Get all tasks for the authenticated user
+// Get all tasks for the authenticated user with task type details
 export const getTasks = query({
   args: {},
   handler: async (ctx) => {
@@ -16,8 +16,28 @@ export const getTasks = query({
       .order('desc')
       .collect();
 
+    // Enrich tasks with task type information
+    const enrichedTasks = await Promise.all(
+      tasks.map(async (task) => {
+        let taskType = null;
+        if (task.taskTypeId) {
+          taskType = await ctx.db.get(task.taskTypeId);
+        }
+        return {
+          ...task,
+          taskType: taskType
+            ? {
+                _id: taskType._id,
+                name: taskType.name,
+                color: taskType.color,
+              }
+            : null,
+        };
+      })
+    );
+
     // Sort by due date (nulls last), then by creation date
-    return tasks.sort((a, b) => {
+    return enrichedTasks.sort((a, b) => {
       // If both have due dates, compare them
       if (a.dueDate && b.dueDate) {
         return a.dueDate - b.dueDate;
@@ -71,11 +91,20 @@ export const createTask = mutation({
     priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
     dueDate: v.optional(v.number()),
     customerId: v.optional(v.id('customers')),
+    taskTypeId: v.optional(v.id('taskTypes')),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error('Not authenticated');
+    }
+
+    // Validate taskTypeId if provided
+    if (args.taskTypeId) {
+      const taskType = await ctx.db.get(args.taskTypeId);
+      if (!taskType || taskType.userId !== identity.subject) {
+        throw new Error('Invalid task type');
+      }
     }
 
     const now = Date.now();
@@ -86,6 +115,7 @@ export const createTask = mutation({
       priority: args.priority ?? 'medium',
       dueDate: args.dueDate,
       customerId: args.customerId,
+      taskTypeId: args.taskTypeId,
       userId: identity.subject,
       createdAt: now,
       updatedAt: now,
@@ -133,6 +163,7 @@ export const updateTask = mutation({
     priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
     dueDate: v.optional(v.number()),
     customerId: v.optional(v.id('customers')),
+    taskTypeId: v.optional(v.id('taskTypes')),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -150,6 +181,14 @@ export const updateTask = mutation({
       throw new Error('Unauthorized');
     }
 
+    // Validate taskTypeId if provided
+    if (args.taskTypeId) {
+      const taskType = await ctx.db.get(args.taskTypeId);
+      if (!taskType || taskType.userId !== identity.subject) {
+        throw new Error('Invalid task type');
+      }
+    }
+
     const updates: Partial<typeof task> = {
       updatedAt: Date.now(),
     };
@@ -159,8 +198,64 @@ export const updateTask = mutation({
     if (args.priority !== undefined) updates.priority = args.priority;
     if (args.dueDate !== undefined) updates.dueDate = args.dueDate;
     if (args.customerId !== undefined) updates.customerId = args.customerId;
+    if (args.taskTypeId !== undefined) updates.taskTypeId = args.taskTypeId;
 
     await ctx.db.patch(args.id, updates);
+  },
+});
+
+// Get tasks for a specific customer with task type details
+export const getTasksByCustomer = query({
+  args: {
+    customerId: v.id('customers'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    // Verify customer belongs to user
+    const customer = await ctx.db.get(args.customerId);
+    if (!customer || customer.userId !== identity.subject) {
+      throw new Error('Customer not found or access denied');
+    }
+
+    const tasks = await ctx.db
+      .query('tasks')
+      .withIndex('by_customer', (q) => q.eq('customerId', args.customerId))
+      .order('desc')
+      .collect();
+
+    // Enrich tasks with task type information
+    const enrichedTasks = await Promise.all(
+      tasks.map(async (task) => {
+        let taskType = null;
+        if (task.taskTypeId) {
+          taskType = await ctx.db.get(task.taskTypeId);
+        }
+        return {
+          ...task,
+          taskType: taskType
+            ? {
+                _id: taskType._id,
+                name: taskType.name,
+                color: taskType.color,
+              }
+            : null,
+        };
+      })
+    );
+
+    // Sort by due date (nulls last), then by creation date
+    return enrichedTasks.sort((a, b) => {
+      if (a.dueDate && b.dueDate) {
+        return a.dueDate - b.dueDate;
+      }
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return b.createdAt - a.createdAt;
+    });
   },
 });
 
