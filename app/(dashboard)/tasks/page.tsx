@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -90,6 +94,7 @@ const priorityConfig: Record<TaskPriority, { label: string; variant: "default" |
 };
 
 function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void }) {
+  const router = useRouter();
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
   const deleteTask = useMutation(api.tasks.deleteTask);
   const updateTask = useMutation(api.tasks.updateTask);
@@ -181,14 +186,20 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onSt
                 )}
                 {task.customer && (
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => router.push(`/customers/${task.customer!._id}`)}
+                      className="flex items-center gap-1 hover:text-primary hover:underline cursor-pointer"
+                    >
                       <User className="h-3 w-3" />
-                      <span className="font-medium text-foreground">{task.customer.name}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
+                      <span className="font-medium">{task.customer.name}</span>
+                    </button>
+                    <a 
+                      href={`tel:${task.customer.phone.replace(/\s/g, '')}`}
+                      className="flex items-center gap-1 hover:text-primary hover:underline"
+                    >
                       <Phone className="h-3 w-3" />
                       <span>{task.customer.phone}</span>
-                    </div>
+                    </a>
                   </div>
                 )}
               </div>
@@ -220,18 +231,45 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onSt
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {canCancel && (
-                    <DropdownMenuItem onClick={() => setShowCancelDialog(true)}>
-                      <Ban className="mr-2 h-4 w-4" />
-                      Cancel
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Play className="mr-2 h-4 w-4" />
+                      Change Status
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {task.status !== "todo" && (
+                        <DropdownMenuItem onClick={() => handleStatusChange("todo")}>
+                          <Clock className="mr-2 h-4 w-4" />
+                          Move to To Do
+                        </DropdownMenuItem>
+                      )}
+                      {task.status !== "in_progress" && (
+                        <DropdownMenuItem onClick={() => handleStatusChange("in_progress")}>
+                          <Play className="mr-2 h-4 w-4" />
+                          Move to In Progress
+                        </DropdownMenuItem>
+                      )}
+                      {task.status !== "done" && (
+                        <DropdownMenuItem onClick={() => handleStatusChange("done")}>
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Move to Done
+                        </DropdownMenuItem>
+                      )}
+                      {task.status !== "cancelled" && (
+                        <DropdownMenuItem onClick={() => handleStatusChange("cancelled")}>
+                          <Ban className="mr-2 h-4 w-4" />
+                          Cancel Task
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-red-600">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
