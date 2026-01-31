@@ -4,6 +4,7 @@ import { ClipboardList, Users, LayoutDashboard, FileText, Settings } from "lucid
 import { NavItem } from "./NavItem";
 import { Wrench } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -48,15 +49,18 @@ export function Sidebar() {
           label="Settings"
           variant="sidebar"
         />
-        <div className="flex items-center gap-3 px-4 py-3">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "h-5 w-5 rounded-full"
-              }
-            }}
-          />
-          <span className="text-muted-foreground">Account</span>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "h-5 w-5 rounded-full"
+                }
+              }}
+            />
+            <span className="text-muted-foreground">Account</span>
+          </div>
+          <ThemeToggle />
         </div>
       </div>
     </aside>
