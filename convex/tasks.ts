@@ -16,7 +16,7 @@ export const getTasks = query({
       .order('desc')
       .collect();
 
-    // Enrich tasks with task type and customer information
+    // Enrich tasks with task type, customer information, and most recent note
     const enrichedTasks = await Promise.all(
       tasks.map(async (task) => {
         let taskType = null;
@@ -27,6 +27,15 @@ export const getTasks = query({
         if (task.customerId) {
           customer = await ctx.db.get(task.customerId);
         }
+
+        // Get the most recent note for this task
+        const notes = await ctx.db
+          .query('taskNotes')
+          .withIndex('by_task', (q) => q.eq('taskId', task._id))
+          .order('desc')
+          .take(1);
+        const mostRecentNote = notes.length > 0 ? notes[0] : null;
+
         return {
           ...task,
           taskType: taskType
@@ -41,6 +50,13 @@ export const getTasks = query({
                 _id: customer._id,
                 name: customer.name,
                 phone: customer.phone,
+              }
+            : null,
+          mostRecentNote: mostRecentNote
+            ? {
+                _id: mostRecentNote._id,
+                content: mostRecentNote.content,
+                createdAt: mostRecentNote.createdAt,
               }
             : null,
         };
@@ -238,13 +254,22 @@ export const getTasksByCustomer = query({
       .order('desc')
       .collect();
 
-    // Enrich tasks with task type information
+    // Enrich tasks with task type information and most recent note
     const enrichedTasks = await Promise.all(
       tasks.map(async (task) => {
         let taskType = null;
         if (task.taskTypeId) {
           taskType = await ctx.db.get(task.taskTypeId);
         }
+
+        // Get the most recent note for this task
+        const notes = await ctx.db
+          .query('taskNotes')
+          .withIndex('by_task', (q) => q.eq('taskId', task._id))
+          .order('desc')
+          .take(1);
+        const mostRecentNote = notes.length > 0 ? notes[0] : null;
+
         return {
           ...task,
           taskType: taskType
@@ -252,6 +277,13 @@ export const getTasksByCustomer = query({
                 _id: taskType._id,
                 name: taskType.name,
                 color: taskType.color,
+              }
+            : null,
+          mostRecentNote: mostRecentNote
+            ? {
+                _id: mostRecentNote._id,
+                content: mostRecentNote.content,
+                createdAt: mostRecentNote.createdAt,
               }
             : null,
         };

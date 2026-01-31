@@ -67,6 +67,12 @@ interface Customer {
   phone: string;
 }
 
+interface TaskNote {
+  _id: Id<"taskNotes">;
+  content: string;
+  createdAt: number;
+}
+
 interface Task {
   _id: string;
   title: string;
@@ -78,6 +84,7 @@ interface Task {
   taskTypeId?: Id<"taskTypes">;
   taskType?: TaskType | null;
   customer?: Customer | null;
+  mostRecentNote?: TaskNote | null;
   createdAt: number;
 }
 
@@ -189,6 +196,13 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { tas
               {task.description && (
                 <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                   {task.description}
+                </p>
+              )}
+
+              {task.mostRecentNote && (
+                <p className="text-sm text-muted-foreground mb-2 italic">
+                  <span className="text-xs text-muted-foreground/60">Latest note: </span>
+                  {task.mostRecentNote.content.slice(0, 50)}
                 </p>
               )}
 
