@@ -3,6 +3,7 @@
 import { ClipboardList, Users, LayoutDashboard, FileText, Settings } from "lucide-react";
 import { NavItem } from "./NavItem";
 import { Wrench } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -40,13 +41,23 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-1">
         <NavItem
           href="/settings"
           icon={Settings}
           label="Settings"
           variant="sidebar"
         />
+        <div className="flex items-center gap-3 px-4 py-3">
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-5 w-5 rounded-full"
+              }
+            }}
+          />
+          <span className="text-muted-foreground">Account</span>
+        </div>
       </div>
     </aside>
   );
