@@ -5,7 +5,7 @@ import ConvexClientProvider from '@/components/ConvexClientProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/Header';
+import { ConditionalHeader } from '@/components/ConditionalHeader';
 import './globals.css';
 
 const inter = Inter({
@@ -40,7 +40,7 @@ export default function RootLayout({
       signInFallbackRedirectUrl="/dashboard"
     >
       <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} ${oswald.variable} antialiased`}>
+        <body className={`${inter.variable} ${oswald.variable} antialiased font-sans`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -49,7 +49,7 @@ export default function RootLayout({
           >
             <ConvexClientProvider>
               <div className="min-h-screen flex flex-col">
-                <Header />
+                <ConditionalHeader />
                 <OnboardingGuard>{children}</OnboardingGuard>
               </div>
             </ConvexClientProvider>

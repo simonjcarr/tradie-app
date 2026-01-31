@@ -80,10 +80,10 @@ export function OnboardingWizard() {
     <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold mb-2">
             Welcome to Tradie App
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Let&apos;s get your business set up in just a few steps
           </p>
         </div>
@@ -103,8 +103,8 @@ export function OnboardingWizard() {
                 <span
                   className={`text-sm ${
                     currentStep >= step.number
-                      ? "text-gray-900 dark:text-white font-medium"
-                      : "text-gray-500 dark:text-gray-400"
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {step.title}

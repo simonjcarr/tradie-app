@@ -36,4 +36,18 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index('by_user', ['userId']),
+
+  customers: defineTable({
+    userId: v.string(), // Owner (the tradie)
+    name: v.string(),
+    phone: v.string(),
+    email: v.optional(v.string()),
+    address: v.optional(v.string()),
+    postcode: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['userId'])
+    .index('by_user_created', ['userId', 'createdAt']),
 });
