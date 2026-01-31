@@ -75,7 +75,7 @@ export function AddTaskDialog({ onTaskAdded }: AddTaskDialogProps) {
   const allCustomers = useQuery(api.customers.getMyCustomers);
   
   // Filter customers based on search query
-  const filteredCustomers = allCustomers?.filter((customer) => {
+  const filteredCustomers = allCustomers?.filter((customer: { name: string; phone: string }) => {
     if (!searchQuery || searchQuery.length < 2) return true;
     const query = searchQuery.toLowerCase();
     return (

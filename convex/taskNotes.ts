@@ -112,3 +112,23 @@ export const deleteNote = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// Get a single note by ID (used internally by noteImages)
+export const getNoteById = query({
+  args: {
+    id: v.id('taskNotes'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    const note = await ctx.db.get(args.id);
+    if (!note || note.userId !== identity.subject) {
+      return null;
+    }
+
+    return note;
+  },
+});

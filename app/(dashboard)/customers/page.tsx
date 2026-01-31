@@ -15,7 +15,7 @@ export default function CustomersPage() {
 
   // Filter customers locally for instant feedback
   const filteredCustomers = customers?.filter(
-    (customer) =>
+    (customer: { name: string; phone: string }) =>
       customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customer.phone.includes(searchQuery)
   );
@@ -74,7 +74,7 @@ export default function CustomersPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredCustomers?.map((customer) => (
+          {filteredCustomers?.map((customer: { _id: string; name: string; phone: string; email?: string; address?: string }) => (
             <Link key={customer._id} href={`/customers/${customer._id}`}>
               <Card className="hover:border-secondary transition-colors cursor-pointer">
                 <CardContent className="p-4">

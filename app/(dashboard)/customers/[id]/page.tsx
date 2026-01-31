@@ -325,7 +325,7 @@ export default function CustomerDetailPage() {
                             <SelectValue placeholder="Select task type" />
                           </SelectTrigger>
                           <SelectContent>
-                            {taskTypes.map((type) => (
+                            {taskTypes.map((type: { _id: string; color: string; name: string }) => (
                               <SelectItem key={type._id} value={type._id}>
                                 <div className="flex items-center gap-2">
                                   <div
@@ -415,7 +415,7 @@ export default function CustomerDetailPage() {
               <p className="text-sm text-muted-foreground">No tasks yet</p>
             ) : (
               <div className="space-y-3">
-                {customerTasks.map((task) => (
+                {customerTasks.map((task: { _id: string; taskType?: { color: string; name: string } | null; title: string; description?: string; priority: string; status: string; dueDate?: number }) => (
                   <div
                     key={task._id}
                     className="flex items-start gap-3 p-3 rounded-lg border"

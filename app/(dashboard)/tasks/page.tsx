@@ -477,10 +477,10 @@ export default function TasksPage() {
   };
 
   const taskCounts = {
-    todo: tasks.filter((t) => t.status === "todo").length,
-    in_progress: tasks.filter((t) => t.status === "in_progress").length,
-    done: tasks.filter((t) => t.status === "done").length,
-    cancelled: tasks.filter((t) => t.status === "cancelled").length,
+    todo: tasks.filter((t: { status: string }) => t.status === "todo").length,
+    in_progress: tasks.filter((t: { status: string }) => t.status === "in_progress").length,
+    done: tasks.filter((t: { status: string }) => t.status === "done").length,
+    cancelled: tasks.filter((t: { status: string }) => t.status === "cancelled").length,
   };
 
   return (

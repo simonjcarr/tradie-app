@@ -46,6 +46,9 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
+import { NoteImageThumbnails } from "@/components/NoteImageThumbnails";
+import { TaskImageGallery } from "@/components/TaskImageGallery";
 
 type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
 type TaskPriority = "low" | "medium" | "high";
@@ -79,6 +82,7 @@ interface Task {
 interface TaskNote {
   _id: Id<"taskNotes">;
   taskId: Id<"tasks">;
+  userId: string;
   content: string;
   createdAt: number;
   updatedAt: number;
@@ -226,6 +230,9 @@ export function TaskViewDialog({ task, open, onOpenChange, onTaskUpdated }: Task
                 )}
               </div>
 
+              {/* Task Images Gallery */}
+              <TaskImageGallery taskId={task._id as Id<"tasks">} />
+
               {/* Notes Section */}
               <div className="space-y-4">
                 <h4 className="font-semibold flex items-center gap-2">
@@ -263,7 +270,7 @@ export function TaskViewDialog({ task, open, onOpenChange, onTaskUpdated }: Task
                     </p>
                   )}
                   
-                  {notes?.map((note) => (
+                   {notes?.map((note: TaskNote) => (
                     <div key={note._id} className="border rounded-lg p-3 space-y-2">
                       {editingNoteId === note._id ? (
                         <div className="space-y-2">
@@ -294,7 +301,21 @@ export function TaskViewDialog({ task, open, onOpenChange, onTaskUpdated }: Task
                       ) : (
                         <>
                           <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          
+                          {/* Note Images */}
+                          <NoteImageThumbnails 
+                            noteId={note._id}
+                            onImageDeleted={onTaskUpdated}
+                          />
+                          
+                          {/* Image Upload */}
+                          <ImageUpload 
+                            noteId={note._id} 
+                            taskId={task._id as Id<"tasks">}
+                            onUploadComplete={onTaskUpdated}
+                          />
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                             <span>
                               {format(note.createdAt, "MMM d, yyyy 'at' h:mm a")}
                               {note.updatedAt > note.createdAt && " (edited)"}

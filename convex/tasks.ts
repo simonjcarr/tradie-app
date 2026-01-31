@@ -326,3 +326,23 @@ export const deleteTask = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// Get a single task by ID (used internally)
+export const getTaskById = query({
+  args: {
+    id: v.id('tasks'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    const task = await ctx.db.get(args.id);
+    if (!task || task.userId !== identity.subject) {
+      return null;
+    }
+
+    return task;
+  },
+});

@@ -81,4 +81,18 @@ export default defineSchema({
   })
     .index('by_task', ['taskId'])
     .index('by_task_created', ['taskId', 'createdAt']),
+
+  noteImages: defineTable({
+    noteId: v.id('taskNotes'),
+    taskId: v.id('tasks'),
+    userId: v.string(),
+    storageId: v.string(), // R2 storage key (private)
+    fileName: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_note', ['noteId'])
+    .index('by_task', ['taskId'])
+    .index('by_user', ['userId']),
 });
