@@ -1,0 +1,247 @@
+"use client";
+
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User } from "lucide-react";
+import { format } from "date-fns";
+
+type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
+type TaskPriority = "low" | "medium" | "high";
+
+interface Task {
+  _id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: number;
+  customerId?: string;
+  createdAt: number;
+}
+
+const statusConfig: Record<TaskStatus, { label: string; color: string; icon: React.ElementType }> = {
+  todo: { label: "To Do", color: "bg-slate-500", icon: Clock },
+  in_progress: { label: "In Progress", color: "bg-blue-500", icon: Play },
+  done: { label: "Done", color: "bg-green-500", icon: CheckCircle },
+  cancelled: { label: "Cancelled", color: "bg-red-500", icon: XCircle },
+};
+
+const priorityConfig: Record<TaskPriority, { label: string; variant: "default" | "secondary" | "destructive" }> = {
+  low: { label: "Low", variant: "secondary" },
+  medium: { label: "Medium", variant: "default" },
+  high: { label: "High", variant: "destructive" },
+};
+
+function TaskCard({ task, onStatusChange }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void }) {
+  const updateStatus = useMutation(api.tasks.updateTaskStatus);
+  
+  const handleStatusChange = async (newStatus: TaskStatus) => {
+    await updateStatus({ id: task._id as any, status: newStatus });
+    onStatusChange(task._id, newStatus);
+  };
+
+  const nextStatusMap: Record<TaskStatus, TaskStatus | null> = {
+    todo: "in_progress",
+    in_progress: "done",
+    done: null,
+    cancelled: null,
+  };
+
+  const nextStatus = nextStatusMap[task.status];
+  const StatusIcon = statusConfig[task.status].icon;
+
+  return (
+    <Card className="mb-3">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-semibold text-base truncate">{task.title}</h3>
+              <Badge variant={priorityConfig[task.priority].variant} className="text-xs">
+                {priorityConfig[task.priority].label}
+              </Badge>
+            </div>
+            
+            {task.description && (
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                {task.description}
+              </p>
+            )}
+            
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              {task.dueDate && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>{format(task.dueDate, "MMM d")}</span>
+                </div>
+              )}
+              {task.customerId && (
+                <div className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  <span>Has customer</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs ${statusConfig[task.status].color}`}>
+              <StatusIcon className="h-3 w-3" />
+              <span>{statusConfig[task.status].label}</span>
+            </div>
+            
+            {nextStatus && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-7"
+                onClick={() => handleStatusChange(nextStatus)}
+              >
+                {nextStatus === "in_progress" && "Start"}
+                {nextStatus === "done" && "Complete"}
+              </Button>
+            )}
+            
+            {task.status !== "cancelled" && task.status !== "done" && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs h-7 text-red-500 hover:text-red-600"
+                onClick={() => handleStatusChange("cancelled")}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TaskList({ tasks, status, onStatusChange }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void }) {
+  const filteredTasks = tasks.filter((task) => task.status === status);
+
+  if (filteredTasks.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <StatusIcon status={status} />
+        <h3 className="text-lg font-semibold mb-2">No {statusConfig[status].label.toLowerCase()} tasks</h3>
+        <p className="text-muted-foreground text-sm">
+          {status === "todo" && "Create a new task to get started"}
+          {status === "in_progress" && "Start a task from the To Do tab"}
+          {status === "done" && "Complete tasks to see them here"}
+          {status === "cancelled" && "Cancelled tasks appear here"}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {filteredTasks.map((task) => (
+        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} />
+      ))}
+    </div>
+  );
+}
+
+function StatusIcon({ status }: { status: TaskStatus }) {
+  const Icon = statusConfig[status].icon;
+  return (
+    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${statusConfig[status].color} bg-opacity-20`}>
+      <Icon className={`h-8 w-8 ${statusConfig[status].color.replace('bg-', 'text-')}`} />
+    </div>
+  );
+}
+
+export default function TasksPage() {
+  const tasks = useQuery(api.tasks.getTasks) || [];
+  const [activeTab, setActiveTab] = useState<TaskStatus>("todo");
+  const [, forceUpdate] = useState({});
+
+  const handleStatusChange = () => {
+    // Force re-render to update task lists
+    forceUpdate({});
+  };
+
+  const taskCounts = {
+    todo: tasks.filter((t) => t.status === "todo").length,
+    in_progress: tasks.filter((t) => t.status === "in_progress").length,
+    done: tasks.filter((t) => t.status === "done").length,
+    cancelled: tasks.filter((t) => t.status === "cancelled").length,
+  };
+
+  return (
+    <div className="container mx-auto p-4 lg:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold">Tasks</h1>
+          <p className="text-muted-foreground">Manage your to-do list</p>
+        </div>
+        <Button className="w-full sm:w-auto gap-2">
+          <Plus className="h-4 w-4" />
+          New Task
+        </Button>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TaskStatus)} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="todo" className="text-xs sm:text-sm">
+            To Do
+            {taskCounts.todo > 0 && (
+              <span className="ml-2 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                {taskCounts.todo}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="in_progress" className="text-xs sm:text-sm">
+            In Progress
+            {taskCounts.in_progress > 0 && (
+              <span className="ml-2 text-xs bg-blue-200 dark:bg-blue-800 px-2 py-0.5 rounded-full">
+                {taskCounts.in_progress}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="done" className="text-xs sm:text-sm">
+            Done
+            {taskCounts.done > 0 && (
+              <span className="ml-2 text-xs bg-green-200 dark:bg-green-800 px-2 py-0.5 rounded-full">
+                {taskCounts.done}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="cancelled" className="text-xs sm:text-sm">
+            Cancelled
+            {taskCounts.cancelled > 0 && (
+              <span className="ml-2 text-xs bg-red-200 dark:bg-red-800 px-2 py-0.5 rounded-full">
+                {taskCounts.cancelled}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="todo">
+          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} />
+        </TabsContent>
+
+        <TabsContent value="in_progress">
+          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} />
+        </TabsContent>
+
+        <TabsContent value="done">
+          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} />
+        </TabsContent>
+
+        <TabsContent value="cancelled">
+          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

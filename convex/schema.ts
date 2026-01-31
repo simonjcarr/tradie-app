@@ -30,12 +30,19 @@ export default defineSchema({
   }).index('byExternalId', ['externalId']),
 
   tasks: defineTable({
-    text: v.string(),
-    isCompleted: v.boolean(),
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(v.literal('todo'), v.literal('in_progress'), v.literal('done'), v.literal('cancelled')),
+    priority: v.union(v.literal('low'), v.literal('medium'), v.literal('high')),
+    dueDate: v.optional(v.number()),
+    customerId: v.optional(v.id('customers')),
     userId: v.string(),
     createdAt: v.number(),
+    updatedAt: v.number(),
   })
-    .index('by_user', ['userId']),
+    .index('by_user', ['userId'])
+    .index('by_user_status', ['userId', 'status'])
+    .index('by_user_dueDate', ['userId', 'dueDate']),
 
   customers: defineTable({
     userId: v.string(), // Owner (the tradie)
