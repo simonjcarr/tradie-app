@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Plus, Clock, XCircle, Play, Calendar, User, Phone, MoreVertical, Pencil, Trash2, Ban } from "lucide-react";
 import { AddTaskDialog } from "./add-task-dialog";
+import { TaskViewDialog } from "./task-view-dialog";
 import { format } from "date-fns";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -93,7 +94,7 @@ const priorityConfig: Record<TaskPriority, { label: string; variant: "default" |
   high: { label: "High", variant: "destructive" },
 };
 
-function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void }) {
+function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { task: Task; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void; onTaskClick: (task: Task) => void }) {
   const router = useRouter();
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
   const deleteTask = useMutation(api.tasks.deleteTask);
@@ -145,9 +146,23 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onSt
   const StatusIcon = statusConfig[task.status].icon;
   const canCancel = task.status !== "cancelled" && task.status !== "done";
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open modal if clicking on buttons, dropdowns, or links
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('[role="menuitem"]') ||
+      target.closest('a') ||
+      target.closest('[data-dropdown]')
+    ) {
+      return;
+    }
+    onTaskClick(task);
+  };
+
   return (
     <>
-      <Card className="mb-3">
+      <Card className="mb-3 cursor-pointer hover:shadow-md transition-shadow" onClick={handleCardClick}>
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -373,7 +388,7 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit }: { task: Task; onSt
   );
 }
 
-function TaskList({ tasks, status, onStatusChange, onDelete, onEdit }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void }) {
+function TaskList({ tasks, status, onStatusChange, onDelete, onEdit, onTaskClick }: { tasks: Task[]; status: TaskStatus; onStatusChange: (id: string, status: TaskStatus) => void; onDelete: () => void; onEdit: () => void; onTaskClick: (task: Task) => void }) {
   const filteredTasks = tasks.filter((task) => task.status === status);
 
   if (filteredTasks.length === 0) {
@@ -394,7 +409,7 @@ function TaskList({ tasks, status, onStatusChange, onDelete, onEdit }: { tasks: 
   return (
     <div className="space-y-3">
       {filteredTasks.map((task) => (
-        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} onEdit={onEdit} />
+        <TaskCard key={task._id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} onEdit={onEdit} onTaskClick={onTaskClick} />
       ))}
     </div>
   );
@@ -413,6 +428,8 @@ export default function TasksPage() {
   const tasks = useQuery(api.tasks.getTasks) || [];
   const [activeTab, setActiveTab] = useState<TaskStatus>("todo");
   const [, forceUpdate] = useState({});
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showTaskView, setShowTaskView] = useState(false);
 
   const handleStatusChange = () => {
     // Force re-render to update task lists
@@ -431,6 +448,15 @@ export default function TasksPage() {
 
   const handleEdit = () => {
     // Force re-render to update task lists
+    forceUpdate({});
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setShowTaskView(true);
+  };
+
+  const handleTaskUpdated = () => {
     forceUpdate({});
   };
 
@@ -488,21 +514,28 @@ export default function TasksPage() {
         </TabsList>
 
         <TabsContent value="todo">
-          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
+          <TaskList tasks={tasks} status="todo" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} onTaskClick={handleTaskClick} />
         </TabsContent>
 
         <TabsContent value="in_progress">
-          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
+          <TaskList tasks={tasks} status="in_progress" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} onTaskClick={handleTaskClick} />
         </TabsContent>
 
         <TabsContent value="done">
-          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
+          <TaskList tasks={tasks} status="done" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} onTaskClick={handleTaskClick} />
         </TabsContent>
 
         <TabsContent value="cancelled">
-          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} />
+          <TaskList tasks={tasks} status="cancelled" onStatusChange={handleStatusChange} onDelete={handleDelete} onEdit={handleEdit} onTaskClick={handleTaskClick} />
         </TabsContent>
       </Tabs>
+
+      <TaskViewDialog
+        task={selectedTask}
+        open={showTaskView}
+        onOpenChange={setShowTaskView}
+        onTaskUpdated={handleTaskUpdated}
+      />
     </div>
   );
 }
