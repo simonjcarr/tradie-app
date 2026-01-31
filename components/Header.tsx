@@ -46,7 +46,7 @@ export default function Header() {
                       size="default"
                       className={pathname === item.href
                         ? 'text-primary'
-                        : 'text-primary-foreground hover:bg-primary/80'
+                        : 'text-primary-foreground hover:bg-white/20 hover:text-white'
                       }
                     >
                       <item.icon className="h-4 w-4 mr-2" />
@@ -67,7 +67,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-primary-foreground hover:bg-primary/80"
+                className="lg:hidden text-primary-foreground hover:bg-white/20 hover:text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -77,7 +77,7 @@ export default function Header() {
 
             <SignedOut>
               <SignInButton mode="modal">
-                <Button variant="ghost" size="sm" className="hidden sm:flex text-primary-foreground hover:bg-primary/80">
+                <Button variant="ghost" size="sm" className="hidden sm:flex text-primary-foreground hover:bg-white/20 hover:text-white">
                   Sign In
                 </Button>
               </SignInButton>
@@ -117,7 +117,7 @@ export default function Header() {
                       size="default"
                       className={`w-full justify-start ${pathname === item.href
                         ? 'text-primary'
-                        : 'text-primary-foreground hover:bg-primary/80'
+                        : 'text-primary-foreground hover:bg-white/20 hover:text-white'
                       }`}
                     >
                       <item.icon className="h-5 w-5 mr-3" />
