@@ -3,6 +3,7 @@ import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Hammer, ClipboardList, Users, DollarSign, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { AuthenticatedRedirect } from '@/components/AuthenticatedRedirect';
 
 export default function Home() {
   return (
@@ -41,17 +42,7 @@ export default function Home() {
               </SignedOut>
 
               <SignedIn>
-                <Card className="bg-white/10 backdrop-blur-sm border-2 border-accent max-w-md mx-auto">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-primary-foreground">Alright Boss!</CardTitle>
-                    <CardDescription className="text-primary-foreground/80">Time to crack on, yeah?</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button size="lg" variant="secondary" className="w-full text-lg shadow-xl hover:shadow-2xl">
-                      Let's Get Stuck In
-                    </Button>
-                  </CardContent>
-                </Card>
+                <AuthenticatedRedirect />
               </SignedIn>
             </div>
           </div>

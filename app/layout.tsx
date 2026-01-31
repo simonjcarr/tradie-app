@@ -1,8 +1,22 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
+import { Inter, Oswald } from 'next/font/google';
 import ConvexClientProvider from '@/components/ConvexClientProvider';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const oswald = Oswald({
+  subsets: ['latin'],
+  variable: '--font-oswald',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Tradie App',
@@ -22,7 +36,7 @@ export default function RootLayout({
       }}
     >
       <html lang="en" suppressHydrationWarning>
-        <body className="antialiased">
+        <body className={`${inter.variable} ${oswald.variable} antialiased`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -30,6 +44,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>{children}</ConvexClientProvider>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
