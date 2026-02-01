@@ -125,8 +125,11 @@ export function Step3Preferences({ onComplete, onSkip, onBack, initialData }: St
                     <Input
                       type="number"
                       placeholder="e.g. 5"
-                      {...field}
                       value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : parseInt(value, 10));
+                      }}
                     />
                   </FormControl>
                   <FormDescription>
