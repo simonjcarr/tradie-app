@@ -38,11 +38,11 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 grid w-full border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "fixed z-50 flex flex-col w-full max-h-[100dvh] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 overflow-hidden rounded-none",
         // Mobile: full screen with safe insets for notch/home indicator
-        "inset-x-0 bottom-0 top-0 max-h-[100dvh] rounded-none p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
-        // Desktop: centered dialog with max-width - no padding to allow content to handle it
-        "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90dvh] sm:rounded-lg",
+        "inset-x-0 bottom-0 top-0 p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
+        // Desktop: centered dialog with max-width using margin auto approach
+        "sm:rounded-lg sm:max-w-lg sm:max-h-[90dvh] sm:mx-auto sm:my-auto sm:inset-0 sm:translate-x-0 sm:translate-y-0",
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
         className
       )}
