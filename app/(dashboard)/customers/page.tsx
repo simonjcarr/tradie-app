@@ -15,7 +15,7 @@ export default function CustomersPage() {
 
   // Filter customers locally for instant feedback
   const filteredCustomers = customers?.filter(
-    (customer) =>
+    (customer: { name: string; phone: string }) =>
       customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customer.phone.includes(searchQuery)
   );
@@ -30,12 +30,12 @@ export default function CustomersPage() {
             {customers?.length || 0} customer{customers?.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Link href="/customers/new">
-          <Button className="w-full sm:w-auto gap-2">
+        <Button className="w-full sm:w-auto gap-2" asChild>
+          <Link href="/customers/new">
             <Plus className="h-4 w-4" />
             Add Customer
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {/* Search */}
@@ -46,6 +46,7 @@ export default function CustomersPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
+          suppressHydrationWarning
         />
       </div>
 
@@ -63,20 +64,20 @@ export default function CustomersPage() {
                 : "Add your first customer to get started"}
             </p>
             {!searchQuery && (
-              <Link href="/customers/new">
-                <Button>
+              <Button asChild>
+                <Link href="/customers/new">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Customer
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredCustomers?.map((customer) => (
-            <Link key={customer._id} href={`/customers/${customer._id}`}>
-              <Card className="hover:border-secondary transition-colors cursor-pointer">
+          {filteredCustomers?.map((customer: { _id: string; name: string; phone: string; email?: string; address?: string }) => (
+            <Link key={customer._id} href={`/customers/${customer._id}`} className="block">
+              <Card className="hover:border-secondary transition-colors cursor-pointer h-full">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div>

@@ -10,7 +10,12 @@
 
 import type * as customers from "../customers.js";
 import type * as http from "../http.js";
+import type * as noteImages from "../noteImages.js";
 import type * as onboarding from "../onboarding.js";
+import type * as r2Storage from "../r2Storage.js";
+import type * as taskImages from "../taskImages.js";
+import type * as taskNotes from "../taskNotes.js";
+import type * as taskTypes from "../taskTypes.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
@@ -24,7 +29,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   customers: typeof customers;
   http: typeof http;
+  noteImages: typeof noteImages;
   onboarding: typeof onboarding;
+  r2Storage: typeof r2Storage;
+  taskImages: typeof taskImages;
+  taskNotes: typeof taskNotes;
+  taskTypes: typeof taskTypes;
   tasks: typeof tasks;
   users: typeof users;
   utils: typeof utils;

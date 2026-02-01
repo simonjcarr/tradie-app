@@ -267,4 +267,5 @@ it("should archive a task", async () => {
 - Do a code review of the pull request.
 - Merge the pull request into the development branch if the code review does not find any issues.
 - If the code review finds issues, address them and push the changes to the feature branch.
-- After merging the pull request, delete the feature branch both locally and remotely.
+- **important** pull the latest changes to the remote development branch to the local development branch
+- After merging, delete the feature branch both locally and remotely.

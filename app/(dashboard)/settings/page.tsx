@@ -20,8 +20,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TRADE_TYPES, PAYMENT_METHODS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Building2, Monitor } from "lucide-react";
 
 const formSchema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
@@ -38,7 +42,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function SettingsPage() {
+function BusinessProfileTab() {
   const { toast } = useToast();
   const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus);
   const updateProfile = useMutation(api.onboarding.updateProfile);
@@ -82,17 +86,14 @@ export default function SettingsPage() {
   const completionPercentage = onboardingStatus.completionPercentage;
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Business Profile</h1>
-        <div className="flex items-center gap-2">
-          <Badge variant={completionPercentage === 100 ? "default" : "outline"}>
-            {completionPercentage}% Complete
-          </Badge>
-          <p className="text-sm text-muted-foreground">
-            Complete your profile to unlock all features
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <Badge variant={completionPercentage === 100 ? "default" : "outline"}>
+          {completionPercentage}% Complete
+        </Badge>
+        <p className="text-sm text-muted-foreground">
+          Complete your profile to unlock all features
+        </p>
       </div>
 
       <Form {...form}>
@@ -334,6 +335,77 @@ export default function SettingsPage() {
           </div>
         </form>
       </Form>
+    </div>
+  );
+}
+
+function SystemSettingsTab() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+          <CardDescription>Customize how the application looks</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label className="text-base">Dark Mode</Label>
+              <p className="text-sm text-muted-foreground">
+                Toggle between light and dark mode
+              </p>
+            </div>
+            <ThemeToggle />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Coming Soon</CardTitle>
+          <CardDescription>More system settings will be available here</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            We&apos;re working on adding more system settings like notifications, 
+            language preferences, and data export options. Stay tuned!
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your business profile and system preferences
+        </p>
+      </div>
+
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="profile" className="gap-2">
+            <Building2 className="h-4 w-4" />
+            Business Profile
+          </TabsTrigger>
+          <TabsTrigger value="system" className="gap-2">
+            <Monitor className="h-4 w-4" />
+            System Settings
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile">
+          <BusinessProfileTab />
+        </TabsContent>
+
+        <TabsContent value="system">
+          <SystemSettingsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

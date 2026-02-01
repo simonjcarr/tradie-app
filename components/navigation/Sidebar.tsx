@@ -1,12 +1,14 @@
 "use client";
 
-import { ClipboardList, Users, LayoutDashboard, FileText, Settings } from "lucide-react";
+import { ClipboardList, Users, LayoutDashboard, FileText, Settings, CheckCircle } from "lucide-react";
 import { NavItem } from "./NavItem";
 import { Wrench } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
+
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/tasks", icon: CheckCircle, label: "Tasks" },
   { href: "/jobs", icon: ClipboardList, label: "Jobs" },
   { href: "/customers", icon: Users, label: "Clients" },
   { href: "/quotes", icon: FileText, label: "Quotes" },
