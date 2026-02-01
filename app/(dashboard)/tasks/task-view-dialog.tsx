@@ -170,64 +170,64 @@ export function TaskViewDialog({ task, open, onOpenChange, onTaskUpdated }: Task
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  {task.taskType && (
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: task.taskType.color }}
-                      title={task.taskType.name}
-                    />
-                  )}
-                  <DialogTitle className="text-xl">{task.title}</DialogTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={priorityConfig[task.priority].variant}>
-                    {priorityConfig[task.priority].label}
-                  </Badge>
-                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs ${statusConfig[task.status].color}`}>
-                    <StatusIcon className="h-3 w-3" />
-                    <span>{statusConfig[task.status].label}</span>
-                  </div>
+        <DialogContent className="sm:max-w-2xl flex flex-col overflow-hidden">
+          {/* Fixed Header Section */}
+          <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b relative bg-background flex-shrink-0">
+            <div className="pr-8">
+              <div className="flex items-center gap-2 mb-2">
+                {task.taskType && (
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: task.taskType.color }}
+                    title={task.taskType.name}
+                  />
+                )}
+                <DialogTitle className="text-xl">{task.title}</DialogTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={priorityConfig[task.priority].variant}>
+                  {priorityConfig[task.priority].label}
+                </Badge>
+                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-xs ${statusConfig[task.status].color}`}>
+                  <StatusIcon className="h-3 w-3" />
+                  <span>{statusConfig[task.status].label}</span>
                 </div>
               </div>
-            </div>
-          </DialogHeader>
 
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-6">
+              {/* Due Date */}
+              {task.dueDate && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>Due: {format(task.dueDate, "MMM d, yyyy")}</span>
+                </div>
+              )}
+
+              {/* Client Name & Phone */}
+              {task.customer && (
+                <div className="flex items-center gap-4 text-sm mt-2">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium text-foreground">{task.customer.name}</span>
+                  </div>
+                  <a
+                    href={`tel:${task.customer.phone.replace(/\s/g, "")}`}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span>{task.customer.phone}</span>
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Scrollable Content Section */}
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="px-4 sm:px-6 py-4 space-y-6">
               {/* Task Details */}
               <div className="space-y-2">
                 {task.description && (
                   <p className="text-sm text-muted-foreground">{task.description}</p>
-                )}
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  {task.dueDate && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>Due: {format(task.dueDate, "MMM d, yyyy")}</span>
-                    </div>
-                  )}
-                </div>
-
-                {task.customer && (
-                  <div className="flex items-center gap-4 pt-2 border-t">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span className="font-medium">{task.customer.name}</span>
-                    </div>
-                    <a
-                      href={`tel:${task.customer.phone.replace(/\s/g, "")}`}
-                      className="flex items-center gap-1 hover:text-primary hover:underline"
-                    >
-                      <Phone className="h-4 w-4" />
-                      <span>{task.customer.phone}</span>
-                    </a>
-                  </div>
                 )}
               </div>
 
