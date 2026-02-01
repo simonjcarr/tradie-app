@@ -123,16 +123,6 @@ export function AddTaskDialog({ onTaskAdded }: AddTaskDialogProps) {
     setSearchQuery("");
   };
 
-  // Prevent hydration mismatch by not rendering Dialog until mounted
-  if (!mounted) {
-    return (
-      <Button className="w-full sm:w-auto gap-2">
-        <Plus className="h-4 w-4" />
-        New Task
-      </Button>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>

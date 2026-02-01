@@ -84,5 +84,13 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 }

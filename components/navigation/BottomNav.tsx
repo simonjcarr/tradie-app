@@ -81,13 +81,12 @@ export function BottomNav() {
   return (
     <>
       {/* Overlay */}
-      <div 
-        className={cn(
-          "fixed inset-0 bg-black/50 z-[49] transition-opacity duration-300",
-          isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setIsMenuOpen(false)}
-      />
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[49] transition-opacity duration-300"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
 
       {/* FAB Menu Items - positioned absolutely on screen */}
       {fabPosition && (

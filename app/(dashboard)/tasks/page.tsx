@@ -155,7 +155,7 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { tas
   const StatusIcon = statusConfig[task.status].icon;
   const canCancel = task.status !== "cancelled" && task.status !== "done";
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     // Don't open modal if clicking on buttons, dropdowns, or links
     const target = e.target as HTMLElement;
     if (
@@ -171,7 +171,11 @@ function TaskCard({ task, onStatusChange, onDelete, onEdit, onTaskClick }: { tas
 
   return (
     <>
-      <Card className="mb-3 cursor-pointer hover:shadow-md transition-shadow" onClick={handleCardClick}>
+      <Card 
+        className="mb-3 cursor-pointer hover:shadow-md transition-shadow touch-manipulation" 
+        onClick={handleCardInteraction}
+        onTouchEnd={handleCardInteraction}
+      >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
