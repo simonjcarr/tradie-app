@@ -49,6 +49,7 @@ import {
 import { ImageUpload } from "@/components/ImageUpload";
 import { NoteImageThumbnails } from "@/components/NoteImageThumbnails";
 import { TaskImageGallery } from "@/components/TaskImageGallery";
+import { TaskImageUpload } from "@/components/TaskImageUpload";
 
 type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
 type TaskPriority = "low" | "medium" | "high";
@@ -231,7 +232,13 @@ export function TaskViewDialog({ task, open, onOpenChange, onTaskUpdated }: Task
               </div>
 
               {/* Task Images Gallery */}
-              <TaskImageGallery taskId={task._id as Id<"tasks">} />
+              <div className="space-y-3">
+                <TaskImageGallery taskId={task._id as Id<"tasks">} />
+                <TaskImageUpload 
+                  taskId={task._id as Id<"tasks">}
+                  onUploadComplete={onTaskUpdated}
+                />
+              </div>
 
               {/* Notes Section */}
               <div className="space-y-4">

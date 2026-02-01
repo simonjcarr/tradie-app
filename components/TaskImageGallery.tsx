@@ -22,9 +22,13 @@ interface TaskImageGalleryProps {
   taskId: Id<"tasks">;
 }
 
-interface ImageWithUrl {
-  _id: Id<"noteImages">;
+interface ImageItem {
+  _id: Id<"taskImages"> | Id<"noteImages">;
   fileName: string;
+  source: 'task' | 'note';
+}
+
+interface ImageWithUrl extends ImageItem {
   url: string;
 }
 
@@ -34,9 +38,11 @@ export function TaskImageGallery({ taskId }: TaskImageGalleryProps) {
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [isLoadingUrls, setIsLoadingUrls] = useState(false);
   
-  const images = useQuery(api.noteImages.getTaskImages, { taskId });
-  const deleteImage = useMutation(api.noteImages.deleteImage);
-  const generateDownloadUrls = useAction(api.noteImages.generateDownloadUrls);
+  const images = useQuery(api.taskImages.getAllTaskImages, { taskId });
+  const deleteTaskImage = useMutation(api.taskImages.deleteImage);
+  const deleteNoteImage = useMutation(api.noteImages.deleteImage);
+  const generateTaskImageUrls = useAction(api.taskImages.generateDownloadUrls);
+  const generateNoteImageUrls = useAction(api.noteImages.generateDownloadUrls);
 
   // Fetch presigned URLs for images
   const fetchImageUrls = useCallback(async () => {
@@ -44,38 +50,58 @@ export function TaskImageGallery({ taskId }: TaskImageGalleryProps) {
     
     setIsLoadingUrls(true);
     try {
-      const imageIds = images.map((img: { _id: Id<"noteImages"> }) => img._id);
-      const { urls } = await generateDownloadUrls({ imageIds });
-      setImageUrls(urls);
+      // Separate task images and note images
+      const taskImageIds = images
+        .filter(img => img.source === 'task')
+        .map((img: { _id: Id<"taskImages"> }) => img._id);
+      
+      const noteImageIds = images
+        .filter(img => img.source === 'note')
+        .map((img: { _id: Id<"noteImages"> }) => img._id);
+
+      // Fetch URLs for both types
+      const [taskUrlsResult, noteUrlsResult] = await Promise.all([
+        taskImageIds.length > 0 ? generateTaskImageUrls({ imageIds: taskImageIds }) : Promise.resolve({ urls: {} }),
+        noteImageIds.length > 0 ? generateNoteImageUrls({ imageIds: noteImageIds }) : Promise.resolve({ urls: {} }),
+      ]);
+
+      // Merge URLs
+      setImageUrls({
+        ...taskUrlsResult.urls,
+        ...noteUrlsResult.urls,
+      });
     } catch (error) {
       console.error("Failed to fetch image URLs:", error);
     } finally {
       setIsLoadingUrls(false);
     }
-  }, [images, generateDownloadUrls]);
+  }, [images, generateTaskImageUrls, generateNoteImageUrls]);
 
   // Fetch URLs when images change
   useEffect(() => {
     fetchImageUrls();
   }, [fetchImageUrls]);
 
-  const handleDelete = async (imageId: Id<"noteImages">) => {
+  const handleDelete = async (image: ImageItem) => {
     if (!confirm("Are you sure you want to delete this image?")) return;
     
     try {
-      await deleteImage({ id: imageId });
+      if (image.source === 'task') {
+        await deleteTaskImage({ id: image._id as Id<"taskImages"> });
+      } else {
+        await deleteNoteImage({ id: image._id as Id<"noteImages"> });
+      }
       setSelectedImage(null);
     } catch (error) {
       console.error("Failed to delete image:", error);
     }
   };
 
-  const handleImageClick = (image: { _id: Id<"noteImages">; fileName: string }) => {
+  const handleImageClick = (image: ImageItem) => {
     const url = imageUrls[image._id];
     if (url) {
       setSelectedImage({
-        _id: image._id,
-        fileName: image.fileName,
+        ...image,
         url,
       });
     }
@@ -104,7 +130,7 @@ export function TaskImageGallery({ taskId }: TaskImageGalleryProps) {
         
         <CollapsibleContent className="mt-4">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-            {images.map((image: { _id: Id<"noteImages">; fileName: string }) => (
+            {images.map((image: ImageItem) => (
               <button
                 key={image._id}
                 onClick={() => handleImageClick(image)}
@@ -136,7 +162,7 @@ export function TaskImageGallery({ taskId }: TaskImageGalleryProps) {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => selectedImage && handleDelete(selectedImage._id)}
+                onClick={() => selectedImage && handleDelete(selectedImage)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
