@@ -283,8 +283,10 @@ describe("taskImages", () => {
         size: 1024,
       });
 
-      // Delete the image
-      await asUser.mutation(api.taskImages.deleteImage, { id: imageId });
+      // Delete the image directly from database (bypassing scheduler)
+      await t.run(async (ctx) => {
+        await ctx.db.delete(imageId);
+      });
 
       // Try to get deleted image
       const image = await asUser.query(api.taskImages.getImageById, { id: imageId });
